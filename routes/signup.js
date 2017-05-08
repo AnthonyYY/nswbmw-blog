@@ -61,7 +61,7 @@ router.post('/',checkNotLogin,function (req,res,next) {
     res.redirect('/posts');
   }).catch(function (e) {
     fs.unlink(req.files.avatar.path);
-    if(e.message.match('E1100 duplicate key')){
+    if(e.message.match('E11000 duplicate key')){
       req.flash('error','用户名已被占用');
       return res.redirect('/signup');
     }
