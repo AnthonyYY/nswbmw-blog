@@ -5,7 +5,7 @@ const checkLogin = require('../middlewares/check').checkLogin;
 
 // GET /posts?author=xxx
 router.get('/',checkLogin,function (req,res,next) {
-  res.send(req.flash());
+  res.render('posts');
 });
 
 // POST /posts
