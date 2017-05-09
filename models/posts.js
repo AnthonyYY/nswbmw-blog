@@ -1,5 +1,6 @@
 const marked = require('marked');
 const Post = require('../lib/mongo').Post;
+const Comment = require('./comments');
 
 Post.plugin('contentToHtml',{
   afterFind: function (posts) {
