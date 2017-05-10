@@ -1,4 +1,5 @@
 const PostModel = require('../models/posts');
+const CommentModel = require('../models/comments');
 const express = require('express');
 const router = express.Router();
 
@@ -55,15 +56,18 @@ router.get('/:postId',checkLogin,function (req,res,next) {
   var postId = req.params.postId;
   Promise.all([
     PostModel.getPostById(postId),
+    CommentModel.getComments(postId),
     PostModel.incPv(postId)
   ])
   .then(function (result) {
     var post = result[0];
+    var comments = result[1];
     if(!post){
       throw new Error('该文章不存在');
     }
     res.render('post',{
-      post: post
+      post: post,
+      comments: comments
     });
   }).catch(next);
 });
@@ -112,12 +116,33 @@ router.get('/:postId/remove',checkLogin,function (req,res,next) {
 
 // POST /posts/:postId/comment/
 router.post('/:postId/comment',checkLogin,function (req,res,next) {
-  res.send(req.flash());
+  var postId = req.params.postId;
+  var content = req.fields.content;
+  var author = req.session.user._id;
+  var comment = {
+    postId: postId,
+    content: content,
+    author: author
+  };
+  CommentModel.create(comment)
+  .then(function () {
+    req.flash('success','留言成功');
+    res.redirect('back');
+  }).catch(next);
+
 });
 
 // GET /posts/:postId/comment/:commentId/remove
-router.post('/:postId/comment/:commentId/remove',checkLogin,function (req,res,next) {
-  res.send(req.flash());
+router.get('/:postId/comments/:commentId/remove',checkLogin,function (req,res,next) {
+  console.log('run over here...');
+  var commentId = req.params.commentId;
+  var author = req.session.user._id;
+
+  CommentModel.delCommentById(commentId,author)
+  .then(function(){
+    req.flash('success','删除留言成功');
+    res.redirect('back');
+  }).catch(next)
 });
 
 module.exports = router;

@@ -1,6 +1,27 @@
 const marked = require('marked');
 const Post = require('../lib/mongo').Post;
 const Comment = require('./comments');
+const CommentModel = require('./comments');
+
+Post.plugin('addCommentsCount',{
+  afterFind: function(posts){
+    return Promise.all(posts.map(function (post) {
+      return CommentModel.getCommentsCount(post._id).then(function(commentsCount){
+        post.commentsCount = commentsCount;
+        return post;
+      });
+    }));
+  },
+  afterFindOne: function (post) {
+    if(post){
+      return CommentModel.getCommentsCount(post._id).then(function(count){
+        post.commentsCount = count;
+        return post;
+      });
+    }
+    return post;
+  }
+});
 
 Post.plugin('contentToHtml',{
   afterFind: function (posts) {
@@ -25,6 +46,7 @@ module.exports = {
     return Post.findOne({_id: postId})
     .populate({path: 'author',model: 'User'})
     .addCreatedAt()
+    .addCommentsCount()
     .contentToHtml()
     .exec();
   },
@@ -37,6 +59,7 @@ module.exports = {
     return Post.find(query)
     .populate({path: 'author',model: 'User'})
     .sort({_id: -1})
+    .addCommentsCount()
     .addCreatedAt()
     .contentToHtml()
     .exec();

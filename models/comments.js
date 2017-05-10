@@ -2,6 +2,15 @@ const marked = require('marked');
 const Comment = require('../lib/mongo').Comment;
 
 Comment.plugin('contentToHtml',{
+  afterFind: function(comments){
+    return comments.map(function (comment) {
+      comment.content = marked(comment.content);
+      return comment;
+    });
+  }
+})
+
+module.exports = {
   create: function(comment){
     return Comment.create(comment).exec();
   },
@@ -27,4 +36,4 @@ Comment.plugin('contentToHtml',{
   getCommentsCount: function(postId){
     return Comment.count({postId:postId}).exec();
   }
-})
+};
