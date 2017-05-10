@@ -49,13 +49,13 @@ app.use(function (req,res,next) {
 });
 
 app.use(expressWinston.logger({
-  transport: [
-    new (winston.transport.Console)({
+  transports: [
+    new (winston.transports.Console)({
       json: true,
       colorize: true
     }),
-    new winston.transport.File({
-      filename: '/logs/success.log'
+    new winston.transports.File({
+      filename: 'logs/success.log'
     })
   ]
 }))
@@ -63,13 +63,13 @@ app.use(expressWinston.logger({
 routes(app);
 
 app.use(expressWinston.errorLogger({
-  transport: [
-    new (winston.transport.Console)({
+  transports: [
+    new (winston.transports.Console)({
       json: true,
       colorize: true
     }),
-    new winston.transport.File({
-      filename: '/logs/error.log'
+    new winston.transports.File({
+      filename: 'logs/error.log'
     })
   ]
 }))
