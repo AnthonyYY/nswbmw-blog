@@ -6,6 +6,8 @@ const flash = require('connect-flash');
 const config = require('config-lite')(__dirname);
 const routes = require('./routes');
 const pkg = require('./package');
+const winston = require('winston');
+const expressWinston = require('express-winston');
 
 var app = express();
 
@@ -46,7 +48,37 @@ app.use(function (req,res,next) {
   next();
 });
 
+app.use(expressWinston.logger({
+  transport: [
+    new (winston.transport.Console)({
+      json: true,
+      colorize: true
+    }),
+    new winston.transport.File({
+      filename: '/logs/success.log'
+    })
+  ]
+}))
+
 routes(app);
+
+app.use(expressWinston.errorLogger({
+  transport: [
+    new (winston.transport.Console)({
+      json: true,
+      colorize: true
+    }),
+    new winston.transport.File({
+      filename: '/logs/error.log'
+    })
+  ]
+}))
+
+app.use(function(err,req,res,next){
+  res.render('error',{
+    error: err
+  });
+});
 
 app.listen(config.port,function () {
   console.log(`${pkg.name} listening on port ${config.port}`);
